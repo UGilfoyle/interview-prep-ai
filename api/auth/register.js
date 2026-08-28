@@ -50,6 +50,14 @@ export default async function handler(req, res) {
       { expiresIn: '30d' }
     );
 
+    // Send Welcome email via Resend in background if key is provided
+    try {
+      const { sendWelcomeEmail } = await import('../email.js');
+      sendWelcomeEmail({ email: email.toLowerCase().trim(), name });
+    } catch (e) {
+      // Ignore background email error so registration is not blocked
+    }
+
     return res.status(201).json({
       success: true,
       token,
