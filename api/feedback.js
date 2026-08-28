@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
-import { getDb, initDb } from '../db.js';
-import { sendFeedbackNotification } from '../email.js';
+import { getDb, initDb } from '../lib/db.js';
+import { sendFeedbackNotification } from '../lib/email.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'interview_prep_ai_jwt_secret_default_2026';
 
@@ -20,9 +20,7 @@ export default async function handler(req, res) {
       const decoded = jwt.verify(token, JWT_SECRET);
       userId = decoded.userId;
       userEmail = decoded.email;
-    } catch (e) {
-      // Allow guest submission
-    }
+    } catch (e) {}
   }
 
   const { rating = 5, category = 'General Experience', feedbackText = '', email = '' } = req.body || {};
@@ -55,9 +53,7 @@ export default async function handler(req, res) {
       feedbackText: feedbackText.trim(),
       userEmail: finalEmail
     });
-  } catch (e) {
-    // Ignore notification error
-  }
+  } catch (e) {}
 
   return res.status(200).json({
     success: true,

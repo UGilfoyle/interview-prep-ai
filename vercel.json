@@ -3,8 +3,24 @@
   "framework": "vite",
   "rewrites": [
     {
-      "source": "/api/(.*)",
-      "destination": "/api/$1"
+      "source": "/api/auth/:path*",
+      "destination": "/api/auth?path=:path*"
+    },
+    {
+      "source": "/api/sessions/:path*",
+      "destination": "/api/sessions?path=:path*"
+    },
+    {
+      "source": "/api/feedback/:path*",
+      "destination": "/api/feedback?path=:path*"
+    },
+    {
+      "source": "/api/health",
+      "destination": "/api/health"
+    },
+    {
+      "source": "/privacy.html",
+      "destination": "/privacy.html"
     },
     {
       "source": "/(.*)",

@@ -1,4 +1,4 @@
-import { getDb, initDb } from './db.js';
+import { getDb, initDb } from '../lib/db.js';
 
 export default async function handler(req, res) {
   const sql = getDb();
@@ -6,12 +6,13 @@ export default async function handler(req, res) {
     return res.status(200).json({
       status: 'ok',
       database: 'not_configured',
-      message: 'Running in frontend/local storage mode. To enable Neon Postgres, set DATABASE_URL in Vercel.'
+      message: 'DATABASE_URL not configured'
     });
   }
 
   try {
     const start = performance.now();
+    await initDb();
     const result = await sql`SELECT 1 as connected;`;
     const latency = Math.round(performance.now() - start);
 
