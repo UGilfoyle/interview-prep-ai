@@ -1,6 +1,6 @@
 /**
  * Client Authentication & Cloud Sync Service for Neon Postgres
- * Supports Direct Email/Password, GitHub OAuth, and LinkedIn OAuth
+ * Supports Direct Email/Password, Email OTP via Resend, GitHub OAuth, and LinkedIn OAuth
  */
 
 const TOKEN_KEY = 'interview_prep_auth_token';
@@ -47,7 +47,6 @@ export function startOAuthFlow(provider) {
     );
 
     if (!popup) {
-      // If popup blocked, fallback to direct redirect
       window.location.href = popupUrl;
       return;
     }
@@ -65,12 +64,10 @@ export function startOAuthFlow(provider) {
 
     window.addEventListener('message', messageListener);
 
-    // Timeout or check if closed
     const timer = setInterval(() => {
       if (popup.closed) {
         clearInterval(timer);
         window.removeEventListener('message', messageListener);
-        // Check if token was set
         const user = getStoredUser();
         if (user) {
           resolve(user);
@@ -78,6 +75,38 @@ export function startOAuthFlow(provider) {
       }
     }, 1000);
   });
+}
+
+/**
+ * Send 6-digit OTP code to email via Resend
+ */
+export async function sendEmailOtp(email) {
+  const res = await fetch('/api/auth/send-otp', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email })
+  });
+
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Failed to send verification code');
+  return data;
+}
+
+/**
+ * Verify 6-digit OTP code
+ */
+export async function verifyEmailOtp({ email, code, name }) {
+  const res = await fetch('/api/auth/verify-otp', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, code, name })
+  });
+
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Invalid verification code');
+
+  setSessionAuth(data.token, data.user);
+  return data;
 }
 
 /**
@@ -99,7 +128,6 @@ export async function registerUser({ email, password, name }) {
     setSessionAuth(data.token, data.user);
     return { success: true, user: data.user, token: data.token };
   } catch (err) {
-    // If running purely offline/static fallback
     if (err.message.includes('Failed to fetch') || err.message.includes('404')) {
       const mockUser = {
         id: `local_${Date.now()}`,
@@ -197,4 +225,23 @@ export async function fetchUserSessionsFromCloud() {
   } catch (err) {
     return [];
   }
+}
+
+/**
+ * Submit User Experience & Platform Feedback
+ */
+export async function submitPlatformFeedback({ rating, category, feedbackText, email }) {
+  const token = getStoredToken();
+  const res = await fetch('/api/feedback/submit', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {})
+    },
+    body: JSON.stringify({ rating, category, feedbackText, email })
+  });
+
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Failed to submit feedback');
+  return data;
 }

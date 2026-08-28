@@ -8,7 +8,7 @@ import {
   LogoutOutlined,
   SafetyCertificateOutlined,
   UserOutlined,
-  DatabaseOutlined
+  MessageOutlined
 } from '@ant-design/icons';
 import { ROLE_TRACKS } from '../data/roleTracks';
 
@@ -21,6 +21,7 @@ export function Navbar({
   onOpenHistory,
   onOpenSettings,
   onOpenAuth,
+  onOpenFeedback,
   onEndSession,
   onLogout,
   user,
@@ -97,6 +98,16 @@ export function Navbar({
           >
             <SafetyCertificateOutlined />
             <span>{apiConnected ? 'Gemini Active' : 'API Key Setup'}</span>
+          </button>
+
+          {/* Feedback Button */}
+          <button
+            onClick={onOpenFeedback}
+            className="btn btn-ghost btn-sm nav-btn text-brand-primary"
+            title="Share Platform Feedback"
+          >
+            <MessageOutlined />
+            <span className="hidden-mobile">Feedback</span>
           </button>
 
           {/* Framework Cheatsheet Button */}

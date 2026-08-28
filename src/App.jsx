@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { MessageOutlined } from '@ant-design/icons';
 import { Navbar } from './components/Navbar';
 import { HomeScreen } from './components/HomeScreen';
 import { InterviewScreen } from './components/InterviewScreen';
@@ -7,6 +8,7 @@ import { FrameworkGuideModal } from './components/FrameworkGuideModal';
 import { HistoryModal } from './components/HistoryModal';
 import { SettingsModal } from './components/SettingsModal';
 import { AuthModal } from './components/AuthModal';
+import { FeedbackModal } from './components/FeedbackModal';
 import {
   DEFAULT_GEMINI_KEY,
   generateTailoredQuestion,
@@ -63,6 +65,7 @@ export function App() {
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [showScorecardModal, setShowScorecardModal] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [viewingHistoricalSession, setViewingHistoricalSession] = useState(null);
 
   // History stored in localStorage + Neon Cloud
@@ -287,6 +290,7 @@ export function App() {
         onOpenHistory={() => setShowHistoryModal(true)}
         onOpenSettings={() => setShowSettingsModal(true)}
         onOpenAuth={() => setShowAuthModal(true)}
+        onOpenFeedback={() => setShowFeedbackModal(true)}
         onLogout={handleLogout}
         onEndSession={handleFinishSession}
         apiConnected={apiConnected}
@@ -343,6 +347,16 @@ export function App() {
         )}
       </main>
 
+      {/* Floating Feedback Trigger */}
+      <button
+        onClick={() => setShowFeedbackModal(true)}
+        className="floating-feedback-btn"
+        title="Share your feedback with the team"
+      >
+        <MessageOutlined />
+        <span>Feedback</span>
+      </button>
+
       {/* Footer */}
       <footer className="app-footer">
         <div className="footer-inner">
@@ -350,6 +364,13 @@ export function App() {
             InterviewPrep AI &bull; Google Gemini API &bull; Web Speech Recognition &bull; Neon Serverless Postgres
           </p>
           <div className="footer-links">
+            <button
+              onClick={() => setShowFeedbackModal(true)}
+              className="footer-link-btn"
+            >
+              Give Feedback
+            </button>
+            <span className="footer-divider">&bull;</span>
             <button
               onClick={() => setShowFrameworksModal(true)}
               className="footer-link-btn"
@@ -373,6 +394,14 @@ export function App() {
           isOpen={showAuthModal}
           onClose={() => setShowAuthModal(false)}
           onAuthSuccess={handleAuthSuccess}
+        />
+      )}
+
+      {showFeedbackModal && (
+        <FeedbackModal
+          isOpen={showFeedbackModal}
+          onClose={() => setShowFeedbackModal(false)}
+          user={user}
         />
       )}
 

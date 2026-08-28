@@ -1,6 +1,6 @@
 /**
  * Neon Serverless Postgres Connection & Schema Initialization
- * Supports Email/Password, GitHub OAuth, and LinkedIn OAuth
+ * Supports Email/Password, GitHub/LinkedIn OAuth, Email OTPs, and User Feedback
  */
 
 import { neon } from '@neondatabase/serverless';
@@ -50,7 +50,7 @@ export async function initDb() {
       await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_url TEXT;`;
       await sql`ALTER TABLE users ALTER COLUMN password_hash DROP NOT NULL;`;
     } catch (e) {
-      // Ignore if columns already exist or not supported
+      // Ignore if columns already exist
     }
 
     // 3. Interview Sessions Table
@@ -68,10 +68,31 @@ export async function initDb() {
       );
     `;
 
-    // Index on user_id
+    // 4. Email OTPs Table (Passwordless Sign-In via Resend)
     await sql`
-      CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON interview_sessions(user_id);
+      CREATE TABLE IF NOT EXISTS email_otps (
+        email VARCHAR(255) PRIMARY KEY,
+        code VARCHAR(10) NOT NULL,
+        expires_at TIMESTAMPTZ NOT NULL
+      );
     `;
+
+    // 5. User Feedback & Experience Ratings Table
+    await sql`
+      CREATE TABLE IF NOT EXISTS user_feedback (
+        id VARCHAR(64) PRIMARY KEY,
+        user_id VARCHAR(64),
+        email VARCHAR(255),
+        rating INTEGER,
+        category VARCHAR(64),
+        feedback_text TEXT,
+        created_at TIMESTAMPTZ DEFAULT NOW()
+      );
+    `;
+
+    // Indexes
+    await sql`CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON interview_sessions(user_id);`;
+    await sql`CREATE INDEX IF NOT EXISTS idx_feedback_created_at ON user_feedback(created_at DESC);`;
 
     return true;
   } catch (err) {
