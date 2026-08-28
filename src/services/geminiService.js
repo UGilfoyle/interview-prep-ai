@@ -1,6 +1,7 @@
 /**
  * Gemini API Integration Service for Multi-Track Tech Interview Simulator
  * Supports Product Management (PM), Software Engineering (SWE), and Scrum Master / Agile tracks
+ * Features FAANG Bar-Raiser Rigorous Scoring Engine
  */
 
 import { getCuratedQuestionForTrack } from '../data/interviewQuestions';
@@ -39,7 +40,7 @@ async function callGeminiApi({ apiKey, prompt, systemInstruction, jsonMode = tru
           }
         ],
         generationConfig: {
-          temperature: 0.7,
+          temperature: 0.65,
           topP: 0.95
         }
       };
@@ -164,48 +165,48 @@ export async function generateTailoredQuestion({
   const currentCategoryObj = trackConfig.categories.find((c) => c.id === category) || trackConfig.categories[0];
   const categoryName = currentCategoryObj.label;
 
-  const prompt = `You are a ${trackConfig.barRaiserTitle} at ${company || 'a top-tier tech company'}.
-You are conducting a live technical interview for the target role of: "${role || trackConfig.defaultRole}".
+  const prompt = `You are an elite, uncompromising ${trackConfig.barRaiserTitle} at ${company || 'a tier-1 tech company like Stripe/Google/Netflix/Meta'}.
+You are conducting a high-stakes technical interview for the target role of: "${role || trackConfig.defaultRole}" at the "${difficulty}" level.
 
 TARGET CANDIDATE DETAILS:
 - Track: ${trackConfig.label}
 - Target Role: ${role || trackConfig.defaultRole}
-- Target Company: ${company || 'Top Tech Company'}
-- Difficulty / Seniority Level: ${difficulty}
-- Interview Category for this round: ${categoryName} (Category Key: "${category}")
-- Question Number: ${questionIndex} of ${totalQuestions}
-${jobDescription ? `- Job Description Context: "${jobDescription.slice(0, 1000)}"` : ''}
-${previousQuestions.length > 0 ? `- Previously asked questions in this session to avoid repeating: ${JSON.stringify(previousQuestions)}` : ''}
+- Target Company: ${company || 'Tier-1 Tech Company'}
+- Difficulty / Level: ${difficulty}
+- Category for this round: ${categoryName} (Key: "${category}")
+- Question Index: ${questionIndex} of ${totalQuestions}
+${jobDescription ? `- Job Description Nuance: "${jobDescription.slice(0, 1000)}"` : ''}
+${previousQuestions.length > 0 ? `- Previously asked questions in this loop (DO NOT REPEAT): ${JSON.stringify(previousQuestions)}` : ''}
 
-INSTRUCTIONS:
-1. Generate ONE highly realistic, rigorous, and practical interview question tailored specifically to the company (${company || 'Target Company'}), the specific role (${role}), and the required category (${categoryName}).
-2. The question must feel authentic to what actual hiring bar raisers ask at top companies like Google, Stripe, Meta, Netflix, Uber, Amazon, and Spotify.
-3. If track is 'pm': Focus on product design (CIRCLES), analytics, TAM sizing, RICE prioritization, or behavioral leadership.
-4. If track is 'swe': Focus on distributed system design (scale, CAP, caching, DB), data structures/algorithms, production debugging/refactoring, API/DB modeling, or technical leadership.
-5. If track is 'scrum_master': Focus on ceremony facilitation (Retrospectives/Planning), resolving dev-QA-PO conflicts, agile metrics/flow, team coaching (GROW), or scaled agile dependencies.
+INSTRUCTIONS FOR HARD, REALISTIC QUESTION GENERATION:
+1. Generate ONE authentic, deeply challenging, and nuanced interview question that top tech companies (Google, Meta, Stripe, Netflix, Uber, Amazon) ask to separate Senior/Staff talent from junior candidates.
+2. DO NOT make it a generic trivia question. Include realistic architectural constraints, scale numbers (e.g. 50k RPS, millions of DAUs, multi-region sync), or conflicting stakeholder dilemmas.
+3. If track is 'pm': Focus on complex product trade-offs (CIRCLES), difficult root-cause metrics drops, TAM sizing with cannibalization, or ruthless feature prioritization (RICE).
+4. If track is 'swe': Focus on distributed system design (CAP theorem, data sharding, cache invalidation storms, idempotent APIs), algorithms with tight memory/time limits, or real-time production incident triage.
+5. If track is 'scrum_master': Focus on resolving toxic team dysfunctions, deep-rooted organizational impediments (5 Whys), cross-team dependency deadlocks in SAFe/Spotify models, or fixing volatile velocity with CFD metrics.
 
-Respond in STRICT JSON format adhering to this structure:
+Respond in STRICT JSON format:
 {
-  "title": "Short descriptive title (e.g. 'Design a Distributed Ledger for Stripe Payments')",
-  "question": "Full verbatim interview question asked by the interviewer",
-  "context": "1-2 sentences on why this question is crucial for this specific role and company",
+  "title": "Concise high-impact title (e.g. 'Design a Real-Time Idempotent Payment Settlement Engine')",
+  "question": "Full verbatim question posed by the interviewer with concrete scale/context",
+  "context": "Why this specific challenge is a critical differentiator for ${difficulty} ${role} candidates",
   "hints": [
-    "Specific hint 1 (e.g. Recommended framework like CIRCLES, System Design 5-Step, or Retrospective 5-Stage)",
-    "Specific hint 2 (Key technical or architectural constraints / user considerations)",
-    "Specific hint 3 (Edge cases, bottlenecks, or trade-offs to evaluate)"
+    "Structural framework recommendation (e.g. CIRCLES, 5-Step System Architecture, GROW Coaching)",
+    "Key architectural/user constraint or failure mode to consider",
+    "Critical trade-off or boundary condition that must be addressed"
   ],
   "clarifications": [
-    "Interviewer clarification 1 if candidate asks about scope/scale/constraints",
-    "Interviewer clarification 2 regarding target environment or parameters"
+    "Interviewer clarification if candidate asks about scope, traffic SLA, or latency budgets",
+    "Interviewer clarification regarding multi-region failure domain or target user persona"
   ],
   "evaluationCriteria": [
-    "Key thing interviewer is looking for 1",
-    "Key thing interviewer is looking for 2",
-    "Key thing interviewer is looking for 3"
+    "What separates a Strong Hire answer from a mediocre one (Criteria 1)",
+    "Concrete technical/strategic depth expected (Criteria 2)",
+    "Handling of non-functional requirements and edge cases (Criteria 3)"
   ]
 }`;
 
-  const systemInstruction = `You are a world-class ${trackConfig.barRaiserTitle}. You output only valid JSON without markdown conversational filler.`;
+  const systemInstruction = `You are a world-class ${trackConfig.barRaiserTitle}. Output pure valid JSON with zero conversational fluff.`;
 
   try {
     const result = await callGeminiApi({
@@ -240,13 +241,13 @@ Respond in STRICT JSON format adhering to this structure:
       ...fallback,
       id: `curated-${fallback.id}-${Date.now()}`,
       isAiGenerated: false,
-      fallbackNotice: 'Loaded from curated interview bank (AI generation offline or timed out).'
+      fallbackNotice: 'Loaded from curated interview bank.'
     };
   }
 }
 
 /**
- * Evaluate Candidate's Answer with Track-Specific Rubric
+ * Evaluate Candidate's Answer with Ultra-Strict FAANG Bar-Raiser Calibrated Scoring Engine
  */
 export async function evaluateCandidateAnswer({
   apiKey,
@@ -261,83 +262,102 @@ export async function evaluateCandidateAnswer({
 }) {
   const trackConfig = ROLE_TRACKS[track] || ROLE_TRACKS.pm;
 
-  if (!answer || answer.trim().length < 15) {
+  if (!answer || answer.trim().length < 25) {
     return {
-      score: 2.0,
+      score: 1.5,
       verdict: 'No Hire',
-      summary: 'Answer was too brief to evaluate thoroughly.',
-      whatWasStrong: ['Attempted the question.'],
-      whatWasMissing: ['Detailed structured thinking, technical depth, edge cases, and trade-off analysis were missing.'],
-      oneSpecificSuggestion: 'Provide a structured, multi-paragraph response using standard frameworks.',
-      modelAnswer: 'Please provide a comprehensive response to receive a full model answer breakdown.',
+      summary: 'Candidate response was severely incomplete and insufficient for technical evaluation.',
+      whatWasStrong: ['Acknowledged the question.'],
+      whatWasMissing: [
+        'Complete absence of structured technical/domain framework.',
+        'Zero quantitative justifications, scale analysis, or architectural blueprints.',
+        'No edge cases, trade-offs, or failure recovery mechanics.'
+      ],
+      oneSpecificSuggestion: 'Speak in structured, comprehensive paragraphs using standard industry frameworks with explicit numbers and trade-offs.',
+      modelAnswer: 'A complete, multi-paragraph response is required to unlock full benchmark analysis.',
       rubricBreakdown: {
-        structureAndClarity: { score: 2, feedback: 'Insufficient detail to assess structure.' },
-        userFocusAndEmpathy: { score: 2, feedback: 'Insufficient technical/domain depth.' },
-        analyticalAndMetricsRigor: { score: 2, feedback: 'No metrics or scalability calculations identified.' },
-        strategicVisionAndTradeoffs: { score: 2, feedback: 'No trade-offs evaluated.' },
-        deliveryAndConciseness: { score: 2, feedback: 'Too brief.' }
+        structureAndClarity: { score: 1, feedback: 'Insufficient length to determine logical structure.' },
+        userFocusAndEmpathy: { score: 1, feedback: 'Did not address target user persona or system requirements.' },
+        analyticalAndMetricsRigor: { score: 1, feedback: 'Zero calculations, metrics, or architectural constraints provided.' },
+        strategicVisionAndTradeoffs: { score: 1, feedback: 'No trade-offs or alternatives evaluated.' },
+        deliveryAndConciseness: { score: 2, feedback: 'Incomplete answer.' }
       }
     };
   }
 
-  const prompt = `You are a ${trackConfig.barRaiserTitle} at ${company || 'a top tech company'}.
-You are evaluating a candidate's answer for the role of: "${role || trackConfig.defaultRole}" (${difficulty} Level).
+  const prompt = `You are an elite, demanding ${trackConfig.barRaiserTitle} at ${company || 'Google/Meta/Stripe/Netflix'}.
+You are conducting a strict hiring committee calibration for a candidate interviewing for: "${role || trackConfig.defaultRole}" at the "${difficulty}" level.
 
-QUESTION ASKED (${track.toUpperCase()} - ${category}):
+QUESTION POSED (${track.toUpperCase()} Track - ${category}):
 "${question.question}"
 
-CANDIDATE'S SUBMITTED ANSWER:
+CANDIDATE'S ACTUAL SUBMITTED TRANSCRIPT / ANSWER:
 """
 ${answer}
 """
 
-ADDITIONAL CONTEXT:
-- Track: ${trackConfig.label}
-- Target Role: ${role || trackConfig.defaultRole}
-- Target Company: ${company || 'Top Tech Company'}
-- Category: ${category}
-${jobDescription ? `- Job Description Nuance: "${jobDescription.slice(0, 500)}"` : ''}
+CANDIDATE TARGET PROFILE:
+- Target Track: ${trackConfig.label}
+- Target Role & Level: ${difficulty} ${role || trackConfig.defaultRole}
+- Target Company Bar: ${company || 'Tier-1 FAANG/Unicorn'}
+- Evaluation Category: ${category}
+${jobDescription ? `- Role Nuances from JD: "${jobDescription.slice(0, 600)}"` : ''}
 
-EVALUATION RUBRIC & INSTRUCTIONS:
-Evaluate this answer with extreme rigor, calibrated against hiring standards at Google, Meta, Stripe, Amazon, Netflix, and Spotify.
-1. Provide an overall score between 1.0 and 10.0 (one decimal place).
-2. Assign an official hiring recommendation: 'Strong Hire' (8.8-10.0), 'Hire' (7.5-8.7), 'Lean Hire' (6.0-7.4), 'Lean No Hire' (4.5-5.9), 'No Hire' (<4.5).
-3. "whatWasStrong": Exactly 2 to 4 bullet points highlighting specific strengths (structural clarity, architectural depth, trade-off analysis, servant leadership, or STAR execution).
-4. "whatWasMissing": Exactly 2 to 4 bullet points identifying critical omissions, unstated assumptions, neglected edge cases, bottlenecks, lack of guardrails, or missing trade-offs.
-5. "oneSpecificSuggestion": Exactly 1 high-impact, actionable coaching sentence that will instantly elevate the candidate's next interview answer.
-6. "modelAnswer": A comprehensive, exemplary ${difficulty}-level model answer to this exact question, structured clearly with headings/bullet points.
-7. "rubricBreakdown": Score (1 to 10) and 1-sentence specific feedback for each of the 5 rubric pillars:
-   - structureAndClarity (${trackConfig.rubricPillars.structureAndClarity})
-   - userFocusAndEmpathy (${trackConfig.rubricPillars.userFocusAndEmpathy})
-   - analyticalAndMetricsRigor (${trackConfig.rubricPillars.analyticalAndMetricsRigor})
-   - strategicVisionAndTradeoffs (${trackConfig.rubricPillars.strategicVisionAndTradeoffs})
-   - deliveryAndConciseness (${trackConfig.rubricPillars.deliveryAndConciseness})
+STRICT BAR-RAISER SCORING CALIBRATION GUIDELINES:
+DO NOT INFLATE SCORES. Be tough, objective, and realistic. Most candidates score between 5.0 and 7.5.
+- **Strong Hire (8.8 - 10.0)**: Reserved ONLY for top 5% candidates. Flawless structure, deep technical/domain mastery, explicit quantitative justification, zero single points of failure, exhaustive trade-off evaluation.
+- **Hire (7.5 - 8.7)**: Solid senior performance. Clear framework, strong rationale, covers primary edge cases, realistic scale considerations. Minor omissions in secondary trade-offs.
+- **Lean Hire (6.0 - 7.4)**: Understands core concepts, but stays at a high level. Lacks specific numerical estimates, misses 1-2 critical edge cases or failure modes, or uses generic buzzwords without mechanics.
+- **Lean No Hire (4.5 - 5.9)**: Superficial answer. Hand-wavy explanations ("I'll just use Redis/AI"), lack of structured progression, fails to handle scale or edge cases, poor trade-off analysis.
+- **No Hire (< 4.5)**: Factually incorrect concepts, rambling without direction, completely missing core question requirements, or dangerously naive assumptions.
 
-Respond ONLY in valid JSON matching this schema:
+TRACK-SPECIFIC PENALTIES:
+- If PM: Deduct heavily if no clear User Persona, missing North Star Metric & Counter-Metric (guardrail), or missing RICE/Go-To-Market risks.
+- If SWE: Deduct heavily if claiming "I will use Kafka/Redis/NoSQL" without explaining partition keys, cache invalidation/thundering herd, CAP theorem consistency model, or database indexing strategies.
+- If Scrum Master: Deduct heavily if demonstrating command-and-control behavior instead of servant-leadership, or ignoring flow metrics (Cycle time, CFD, WIP limits) and psychological safety.
+
+Respond STRICTLY in valid JSON adhering to this schema:
 {
-  "score": 7.8,
-  "verdict": "Hire",
-  "summary": "1-2 sentence executive verdict on candidate performance",
+  "score": 7.4,
+  "verdict": "Lean Hire",
+  "summary": "1-2 sentence executive verdict detailing why this answer passed or fell short of the ${difficulty} bar at ${company || 'top tech companies'}.",
   "whatWasStrong": [
-    "Clear structured breakdown following standard best practices.",
-    "Strong domain depth and explicit trade-off considerations."
+    "Specific strength 1 with direct reference to candidate's points",
+    "Specific strength 2 highlighting structured logic, technical depth, or user empathy",
+    "Specific strength 3 (if applicable)"
   ],
   "whatWasMissing": [
-    "Did not specify edge cases or resilience under failure conditions.",
-    "Lacked explicit quantitative justification."
+    "Critical omission 1 (e.g. neglected partition key skew, missing counter-metrics, unstated failure domains)",
+    "Critical omission 2 (e.g. lack of quantitative throughput estimates or rollback strategies)",
+    "Critical omission 3 (e.g. hand-wavy trade-off justification)"
   ],
-  "oneSpecificSuggestion": "Always conclude your answer by explicitly evaluating at least 2 trade-offs and stating failure recovery modes.",
-  "modelAnswer": "### 1. Requirements & Scope\\n...\\n### 2. Core Architecture / Solutions\\n...\\n### 3. Trade-offs & Resiliency\\n...",
+  "oneSpecificSuggestion": "1 actionable, high-leverage coaching tip that will instantly elevate the candidate's score on this exact topic in their next interview.",
+  "modelAnswer": "### 1. Requirements & Scope Clarification\\n...\\n### 2. High-Level Architecture & Core Strategy\\n...\\n### 3. Deep Dive & Resiliency / Edge Cases\\n...\\n### 4. Explicit Trade-offs & Counter-Metrics\\n...",
   "rubricBreakdown": {
-    "structureAndClarity": { "score": 8, "feedback": "Well-organized progression from problem definition to solution." },
-    "userFocusAndEmpathy": { "score": 8, "feedback": "Demonstrated deep domain empathy and realistic constraints." },
-    "analyticalAndMetricsRigor": { "score": 7, "feedback": "Good quantitative reasoning; could go deeper on edge-case metrics." },
-    "strategicVisionAndTradeoffs": { "score": 7, "feedback": "Clear alignment with business goals; explicit trade-offs discussed." },
-    "deliveryAndConciseness": { "score": 8, "feedback": "Crisp communication with minimal fluff." }
+    "structureAndClarity": {
+      "score": 7,
+      "feedback": "Specific, calibrated feedback on framework adherence and logical sequence."
+    },
+    "userFocusAndEmpathy": {
+      "score": 7,
+      "feedback": "Specific feedback on domain depth, persona understanding, or system functional requirements."
+    },
+    "analyticalAndMetricsRigor": {
+      "score": 6,
+      "feedback": "Specific feedback on quantitative calculations, scale parameters, latency budgets, or data metrics."
+    },
+    "strategicVisionAndTradeoffs": {
+      "score": 7,
+      "feedback": "Specific feedback on explicit evaluation of alternatives, CAP trade-offs, or organizational second-order effects."
+    },
+    "deliveryAndConciseness": {
+      "score": 8,
+      "feedback": "Specific feedback on communication precision, lack of fluff, and clarity."
+    }
   }
 }`;
 
-  const systemInstruction = `You are an elite ${trackConfig.barRaiserTitle}. You evaluate candidates with rigorous, calibrated, and actionable feedback. Return pure valid JSON only.`;
+  const systemInstruction = `You are a legendary ${trackConfig.barRaiserTitle} known for rigorous, calibrated, zero-fluff candidate evaluations. You output pure valid JSON only.`;
 
   const result = await callGeminiApi({
     apiKey,
@@ -351,19 +371,29 @@ Respond ONLY in valid JSON matching this schema:
     throw new Error('Could not parse structured evaluation from Gemini response.');
   }
 
+  const rawScore = Number(parsed.score.toFixed(1));
+  const finalScore = Math.min(10.0, Math.max(1.0, rawScore));
+
+  const derivedVerdict = parsed.verdict || (
+    finalScore >= 8.8 ? 'Strong Hire' :
+    finalScore >= 7.5 ? 'Hire' :
+    finalScore >= 6.0 ? 'Lean Hire' :
+    finalScore >= 4.5 ? 'Lean No Hire' : 'No Hire'
+  );
+
   return {
-    score: Math.min(10, Math.max(1, Number(parsed.score.toFixed(1)))),
-    verdict: parsed.verdict || (parsed.score >= 8.5 ? 'Strong Hire' : parsed.score >= 7.0 ? 'Hire' : parsed.score >= 5.5 ? 'Lean Hire' : 'Lean No Hire'),
-    summary: parsed.summary || 'Answer evaluated against top-tier hiring benchmarks.',
+    score: finalScore,
+    verdict: derivedVerdict,
+    summary: parsed.summary || 'Answer calibrated against top-tier tech hiring standards.',
     whatWasStrong: Array.isArray(parsed.whatWasStrong) ? parsed.whatWasStrong : [parsed.whatWasStrong || 'Good structure.'],
-    whatWasMissing: Array.isArray(parsed.whatWasMissing) ? parsed.whatWasMissing : [parsed.whatWasMissing || 'Missing depth in trade-offs.'],
-    oneSpecificSuggestion: parsed.oneSpecificSuggestion || 'Practice structuring your answers with clear numbered frameworks.',
-    modelAnswer: parsed.modelAnswer || 'Exemplary answer not generated.',
+    whatWasMissing: Array.isArray(parsed.whatWasMissing) ? parsed.whatWasMissing : [parsed.whatWasMissing || 'Missing depth in trade-offs and edge cases.'],
+    oneSpecificSuggestion: parsed.oneSpecificSuggestion || 'Practice structuring your answers with explicit trade-offs and quantitative constraints.',
+    modelAnswer: parsed.modelAnswer || 'Exemplary benchmark answer not generated.',
     rubricBreakdown: parsed.rubricBreakdown || {
-      structureAndClarity: { score: 7, feedback: 'Solid structure.' },
-      userFocusAndEmpathy: { score: 7, feedback: 'Good domain depth.' },
-      analyticalAndMetricsRigor: { score: 7, feedback: 'Reasonable metrics/architecture.' },
-      strategicVisionAndTradeoffs: { score: 7, feedback: 'Fair trade-offs.' },
+      structureAndClarity: { score: 6, feedback: 'Standard progression.' },
+      userFocusAndEmpathy: { score: 6, feedback: 'Adequate domain understanding.' },
+      analyticalAndMetricsRigor: { score: 5, feedback: 'Needs more concrete numerical estimates.' },
+      strategicVisionAndTradeoffs: { score: 5, feedback: 'Explore explicit architectural trade-offs.' },
       deliveryAndConciseness: { score: 7, feedback: 'Clear delivery.' }
     },
     modelUsed: result.modelUsed
@@ -390,7 +420,7 @@ You asked the candidate this question:
 The candidate has just asked you this clarifying question before beginning their full answer:
 "${candidateClarification}"
 
-Provide a realistic, helpful, yet concise response (2-3 sentences max) from the interviewer's perspective to clarify scope, constraints, or assumptions without giving away the entire solution.`;
+Provide a realistic, professional, yet concise response (2-3 sentences max) from the interviewer's perspective to clarify scope, constraints, traffic scale, or assumptions without giving away the entire solution.`;
 
   const result = await callGeminiApi({
     apiKey,
