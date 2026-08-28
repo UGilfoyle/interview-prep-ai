@@ -1,5 +1,6 @@
 /**
  * Neon Serverless Postgres Connection & Schema Initialization
+ * Supports Email/Password, GitHub OAuth, and LinkedIn OAuth
  */
 
 import { neon } from '@neondatabase/serverless';
@@ -28,18 +29,31 @@ export async function initDb() {
   }
 
   try {
-    // 1. Users Table
+    // 1. Users Table (supports Email, GitHub OAuth & LinkedIn OAuth)
     await sql`
       CREATE TABLE IF NOT EXISTS users (
         id VARCHAR(64) PRIMARY KEY,
         email VARCHAR(255) UNIQUE NOT NULL,
-        password_hash VARCHAR(255) NOT NULL,
+        password_hash VARCHAR(255),
         name VARCHAR(255),
+        auth_provider VARCHAR(32) DEFAULT 'email',
+        provider_id VARCHAR(128),
+        avatar_url TEXT,
         created_at TIMESTAMPTZ DEFAULT NOW()
       );
     `;
 
-    // 2. Interview Sessions Table
+    // 2. Add columns if upgrading existing table
+    try {
+      await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS auth_provider VARCHAR(32) DEFAULT 'email';`;
+      await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS provider_id VARCHAR(128);`;
+      await sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_url TEXT;`;
+      await sql`ALTER TABLE users ALTER COLUMN password_hash DROP NOT NULL;`;
+    } catch (e) {
+      // Ignore if columns already exist or not supported
+    }
+
+    // 3. Interview Sessions Table
     await sql`
       CREATE TABLE IF NOT EXISTS interview_sessions (
         id VARCHAR(64) PRIMARY KEY,

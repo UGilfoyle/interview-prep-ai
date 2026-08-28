@@ -1,5 +1,6 @@
 /**
  * Client Authentication & Cloud Sync Service for Neon Postgres
+ * Supports Direct Email/Password, GitHub OAuth, and LinkedIn OAuth
  */
 
 const TOKEN_KEY = 'interview_prep_auth_token';
@@ -29,7 +30,58 @@ export function clearSessionAuth() {
 }
 
 /**
- * Register with Neon backend
+ * 1-Click OAuth Login (GitHub / LinkedIn)
+ */
+export function startOAuthFlow(provider) {
+  return new Promise((resolve, reject) => {
+    const width = 600;
+    const height = 700;
+    const left = window.screen.width / 2 - width / 2;
+    const top = window.screen.height / 2 - height / 2;
+
+    const popupUrl = `/api/auth/oauth?provider=${provider}&action=authorize`;
+    const popup = window.open(
+      popupUrl,
+      `${provider}_login`,
+      `width=${width},height=${height},top=${top},left=${left},toolbar=no,menubar=no`
+    );
+
+    if (!popup) {
+      // If popup blocked, fallback to direct redirect
+      window.location.href = popupUrl;
+      return;
+    }
+
+    const messageListener = (event) => {
+      if (event.data?.type === 'OAUTH_SUCCESS') {
+        window.removeEventListener('message', messageListener);
+        setSessionAuth(event.data.token, event.data.user);
+        resolve(event.data.user);
+      } else if (event.data?.type === 'OAUTH_ERROR') {
+        window.removeEventListener('message', messageListener);
+        reject(new Error(event.data.error || 'OAuth authentication failed'));
+      }
+    };
+
+    window.addEventListener('message', messageListener);
+
+    // Timeout or check if closed
+    const timer = setInterval(() => {
+      if (popup.closed) {
+        clearInterval(timer);
+        window.removeEventListener('message', messageListener);
+        // Check if token was set
+        const user = getStoredUser();
+        if (user) {
+          resolve(user);
+        }
+      }
+    }, 1000);
+  });
+}
+
+/**
+ * Register with Direct Email & Password (No SMTP / Domain Verification Needed)
  */
 export async function registerUser({ email, password, name }) {
   try {
@@ -47,7 +99,7 @@ export async function registerUser({ email, password, name }) {
     setSessionAuth(data.token, data.user);
     return { success: true, user: data.user, token: data.token };
   } catch (err) {
-    // If running in purely local static mode without Vercel API backend
+    // If running purely offline/static fallback
     if (err.message.includes('Failed to fetch') || err.message.includes('404')) {
       const mockUser = {
         id: `local_${Date.now()}`,
@@ -59,7 +111,7 @@ export async function registerUser({ email, password, name }) {
       return {
         success: true,
         user: mockUser,
-        notice: 'Signed in locally (API serverless backend will activate on Vercel deployment)'
+        notice: 'Signed in locally (Neon Postgres backend will sync once DATABASE_URL is configured)'
       };
     }
     throw err;
@@ -67,7 +119,7 @@ export async function registerUser({ email, password, name }) {
 }
 
 /**
- * Login with Neon backend
+ * Login with Direct Email & Password
  */
 export async function loginUser({ email, password }) {
   try {
@@ -96,7 +148,7 @@ export async function loginUser({ email, password }) {
       return {
         success: true,
         user: mockUser,
-        notice: 'Signed in locally (API serverless backend will activate on Vercel deployment)'
+        notice: 'Signed in locally'
       };
     }
     throw err;

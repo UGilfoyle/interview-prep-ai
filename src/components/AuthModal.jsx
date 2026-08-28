@@ -7,9 +7,11 @@ import {
   CloseOutlined,
   CheckCircleOutlined,
   AlertOutlined,
-  ArrowRightOutlined
+  ArrowRightOutlined,
+  GithubOutlined,
+  LinkedinOutlined
 } from '@ant-design/icons';
-import { loginUser, registerUser } from '../services/authService';
+import { loginUser, registerUser, startOAuthFlow } from '../services/authService';
 
 export function AuthModal({
   isOpen,
@@ -21,11 +23,33 @@ export function AuthModal({
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
+  const [oauthLoading, setOauthLoading] = useState(null); // 'github' | 'linkedin' | null
   const [error, setError] = useState(null);
   const [successNotice, setSuccessNotice] = useState(null);
 
   if (!isOpen) return null;
 
+  // Handle OAuth Login (GitHub / LinkedIn)
+  const handleOAuthLogin = async (provider) => {
+    setError(null);
+    setSuccessNotice(null);
+    setOauthLoading(provider);
+
+    try {
+      const user = await startOAuthFlow(provider);
+      if (user) {
+        setSuccessNotice(`Welcome, ${user.name || user.email}! Connected via ${provider === 'github' ? 'GitHub' : 'LinkedIn'}.`);
+        onAuthSuccess(user);
+        setTimeout(() => onClose(), 1000);
+      }
+    } catch (err) {
+      setError(err.message || `${provider} authentication failed.`);
+    } finally {
+      setOauthLoading(null);
+    }
+  };
+
+  // Handle Direct Email/Password Submit
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
@@ -37,12 +61,12 @@ export function AuthModal({
         const res = await registerUser({ email, password, name });
         if (res.notice) setSuccessNotice(res.notice);
         onAuthSuccess(res.user);
-        setTimeout(() => onClose(), 1200);
+        setTimeout(() => onClose(), 1000);
       } else {
         const res = await loginUser({ email, password });
         if (res.notice) setSuccessNotice(res.notice);
         onAuthSuccess(res.user);
-        setTimeout(() => onClose(), 1200);
+        setTimeout(() => onClose(), 1000);
       }
     } catch (err) {
       setError(err.message || 'Authentication failed');
@@ -69,6 +93,42 @@ export function AuthModal({
           </button>
         </div>
 
+        {/* 1. One-Click OAuth Providers (GitHub & LinkedIn) */}
+        <div className="oauth-buttons-container">
+          <button
+            type="button"
+            onClick={() => handleOAuthLogin('github')}
+            disabled={loading || oauthLoading !== null}
+            className="btn btn-secondary oauth-btn oauth-github"
+          >
+            {oauthLoading === 'github' ? (
+              <span className="spinner-sm"></span>
+            ) : (
+              <GithubOutlined style={{ fontSize: '18px' }} />
+            )}
+            <span>Continue with GitHub</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleOAuthLogin('linkedin')}
+            disabled={loading || oauthLoading !== null}
+            className="btn btn-secondary oauth-btn oauth-linkedin"
+          >
+            {oauthLoading === 'linkedin' ? (
+              <span className="spinner-sm"></span>
+            ) : (
+              <LinkedinOutlined style={{ fontSize: '18px', color: '#0a66c2' }} />
+            )}
+            <span>Continue with LinkedIn</span>
+          </button>
+        </div>
+
+        {/* Visual Divider */}
+        <div className="auth-divider">
+          <span>OR WITH EMAIL</span>
+        </div>
+
         {/* Tab Switcher */}
         <div className="auth-tabs-bar">
           <button
@@ -93,6 +153,7 @@ export function AuthModal({
           </button>
         </div>
 
+        {/* Direct Email / Password Form */}
         <form onSubmit={handleSubmit} className="auth-form modal-body">
           {tab === 'register' && (
             <div className="form-group">
@@ -167,10 +228,10 @@ export function AuthModal({
           <div className="neon-db-badge card-subtle">
             <div className="neon-badge-header">
               <DatabaseOutlined className="text-brand-primary" />
-              <span>Neon Postgres Cloud Storage</span>
+              <span>Direct Email & Neon Postgres</span>
             </div>
             <p className="neon-badge-text">
-              Saves your calibrated interview scorecards, recordings, and custom prompts securely across all your devices.
+              Direct sign-up requires no email verification or domain DNS setup. Your password is encrypted with bcrypt and stored safely in Neon Serverless Postgres.
             </p>
           </div>
 
@@ -178,7 +239,11 @@ export function AuthModal({
             <button type="button" onClick={onClose} className="btn btn-secondary">
               Cancel
             </button>
-            <button type="submit" disabled={loading} className="btn btn-primary">
+            <button
+              type="submit"
+              disabled={loading || oauthLoading !== null}
+              className="btn btn-primary"
+            >
               {loading ? (
                 <>
                   <span className="spinner-sm"></span> Authenticating...

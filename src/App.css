@@ -2192,6 +2192,63 @@
   gap: 1.15rem;
 }
 
+.oauth-buttons-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  padding: 1.25rem 1.5rem 0.5rem;
+}
+
+.oauth-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  padding: 0.65rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-default);
+  background-color: #ffffff;
+  transition: all var(--transition-fast);
+}
+
+.oauth-btn:hover {
+  background-color: var(--bg-subtle);
+  border-color: var(--border-strong);
+}
+
+.oauth-github:hover {
+  color: #0f172a;
+}
+
+.oauth-linkedin:hover {
+  color: #0a66c2;
+}
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 0.75rem 1.5rem 0.25rem;
+  color: var(--text-muted);
+  font-size: 0.725rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.auth-divider span {
+  padding: 0 0.75rem;
+}
+
 .neon-db-badge {
   padding: 0.85rem 1rem;
   border-radius: var(--radius-md);
