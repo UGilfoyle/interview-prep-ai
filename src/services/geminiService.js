@@ -236,7 +236,7 @@ Respond in STRICT JSON format:
     };
   } catch (err) {
     console.warn('Gemini question generation error, falling back to curated library:', err);
-    const fallback = getCuratedQuestionForTrack(track, category, role, company);
+    const fallback = getCuratedQuestionForTrack(track, category, role, company, difficulty);
     return {
       ...fallback,
       id: `curated-${fallback.id}-${Date.now()}`,

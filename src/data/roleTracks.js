@@ -89,6 +89,13 @@ export const ROLE_TRACKS = {
         defaultTemplateId: 'star'
       }
     ],
+    experienceLevels: [
+      { id: 'Junior', label: 'Associate / Junior PM (0-2 YOE - APM)' },
+      { id: 'Mid-Level', label: 'Mid-Level PM (3-5 YOE)' },
+      { id: 'Senior', label: 'Senior PM (6-9 YOE - L5/L6)' },
+      { id: 'Lead_Principal_10+', label: 'Group / Principal PM (10+ YOE)' },
+      { id: 'Director_VP_15+', label: 'Director / VP of Product (15+ YOE)' }
+    ],
     rubricPillars: {
       structureAndClarity: 'Structure & Clarity',
       userFocusAndEmpathy: 'User Focus & Empathy',
@@ -125,6 +132,13 @@ export const ROLE_TRACKS = {
       'Stripe',
       'Apple',
       'Microsoft'
+    ],
+    experienceLevels: [
+      { id: 'Junior', label: 'Junior / Entry SWE (0-2 YOE - L3)' },
+      { id: 'Mid-Level', label: 'Mid-Level Engineer (3-5 YOE - L4)' },
+      { id: 'Senior', label: 'Senior Engineer (6-9 YOE - L5)' },
+      { id: 'Staff_10+', label: 'Staff / Tech Lead (10+ YOE - L6)' },
+      { id: 'Principal_15+', label: 'Principal Architect / Fellow (15+ YOE - L7+)' }
     ],
     categories: [
       {
@@ -217,6 +231,12 @@ export const ROLE_TRACKS = {
       'Cisco',
       'Capital One',
       'Atlassian'
+    ],
+    experienceLevels: [
+      { id: 'Junior', label: 'Junior Scrum Master (1-3 YOE)' },
+      { id: 'Mid-Level_5+', label: 'Mid-Level Scrum Master (5+ YOE)' },
+      { id: 'Senior_8+', label: 'Senior Scrum Master / Agile Coach (8+ YOE)' },
+      { id: 'Enterprise_12+', label: 'Enterprise Agile Transformation Lead (12+ YOE)' }
     ],
     categories: [
       {

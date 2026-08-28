@@ -80,6 +80,10 @@ export function HomeScreen({
     if (cfg) {
       setRole(cfg.defaultRole);
       setCompany(cfg.defaultCompany);
+      if (cfg.experienceLevels && cfg.experienceLevels.length > 0) {
+        const defaultLevel = cfg.experienceLevels.find((l) => l.id.includes('Senior') || l.id === 'Senior') || cfg.experienceLevels[0];
+        setExperienceLevel(defaultLevel.id);
+      }
     }
   };
 
@@ -374,14 +378,15 @@ export function HomeScreen({
                 <span>Seniority Level</span>
               </label>
               <select
-                className="input-base select-custom"
+                className="input-base select-custom font-medium"
                 value={experienceLevel}
                 onChange={(e) => setExperienceLevel(e.target.value)}
               >
-                <option value="Junior">Junior / Entry Level</option>
-                <option value="Mid-Level">Mid-Level Engineer / PM</option>
-                <option value="Senior">Senior (L5/L6)</option>
-                <option value="Staff/Principal">Staff / Principal / Director</option>
+                {(currentTrackConfig.experienceLevels || []).map((lvl) => (
+                  <option key={lvl.id} value={lvl.id}>
+                    {lvl.label}
+                  </option>
+                ))}
               </select>
             </div>
 
