@@ -4,11 +4,13 @@
 ![React](https://img.shields.io/badge/React-19.0.0-blue?logo=react)
 ![Gemini AI](https://img.shields.io/badge/Google%20Gemini-3.6%20%7C%203.7%20Flash-4285F4?logo=google)
 ![Ant Design](https://img.shields.io/badge/Ant%20Design-Icons%20%26%20Tokens-0170FE?logo=antdesign)
+![Supabase](https://img.shields.io/badge/Supabase-Auth%20%26%20Postgres-3ECF8E?logo=supabase)
 ![Neon Postgres](https://img.shields.io/badge/Neon-Serverless%20Postgres-00E599?logo=postgresql)
+![Resend](https://img.shields.io/badge/Resend-Transactional%20Email-000000?logo=resend)
 ![pnpm](https://img.shields.io/badge/Package%20Manager-pnpm-F69220?logo=pnpm)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
-An enterprise-grade, AI-powered tech interview prep studio built with **React**, **Ant Design**, **Google Gemini API**, **Web Speech API**, and **Neon Serverless Postgres**.
+An enterprise-grade, AI-powered tech interview prep studio built with **React**, **Ant Design**, **Google Gemini API**, **Web Speech API**, **Supabase**, and **Neon Serverless Postgres**.
 
 Practice company-tailored interview loops for **Product Managers (PM)**, **Software Engineers (SWE)**, and **Scrum Masters / Agile Coaches** with real-time voice speech-to-text, 1-click industry framework templates, and calibrated bar-raiser rubric evaluations.
 
@@ -34,9 +36,12 @@ Practice company-tailored interview loops for **Product Managers (PM)**, **Softw
   - **High-Impact Coaching Tip**: 1 actionable takeaway to elevate candidate leveling.
   - **Gold-Standard Model Answer**: Benchmark reference answer.
   - **5-Pillar Rubric Breakdown**: Dimension-by-dimension scores with visual progress bars.
-- **🐘 Neon Serverless Postgres Authentication & Sync**:
-  - Secure user accounts and cloud storage powered by **Neon Serverless Postgres** (`@neondatabase/serverless`).
-  - Sync scorecards, practice history, and question records seamlessly across devices with offline fallback.
+- **🔐 Multi-Engine Cloud Auth & Data Sync**:
+  - **Primary**: [Supabase](https://supabase.com) Auth & Database with 0-domain email OTP delivery (50,000 users free).
+  - **Backup Dual-Sync**: [Neon Serverless Postgres](https://neon.tech) (`@neondatabase/serverless`) for backup cloud persistence.
+  - 1-Click **GitHub**, **LinkedIn**, **Email OTP**, and **Direct Password** logins.
+- **⭐ User Experience Feedback System**:
+  - Built-in floating feedback widget with 1–5 star rating, category categorization, and database + email notifications.
 - **💎 Ant Design UI/UX**:
   - Clean, professional design system with `@ant-design/icons`, clean typography, white background theme, and responsive mobile layout.
 
@@ -50,8 +55,10 @@ Practice company-tailored interview loops for **Product Managers (PM)**, **Softw
 | **Iconography & UI** | Ant Design (`@ant-design/icons`, `antd`), Canvas Confetti |
 | **AI Intelligence** | Google Gemini API (`gemini-3.6-flash`, `gemini-flash-latest`, `gemini-3.7-flash`) |
 | **Voice / Audio** | Web Speech API (`SpeechRecognition`, `speechSynthesis`) |
+| **Primary Auth & DB** | [Supabase](https://supabase.com) (`@supabase/supabase-js`) |
+| **Backup Cloud DB** | [Neon Serverless Postgres](https://neon.tech) (`@neondatabase/serverless`) |
+| **Transactional Email**| [Resend](https://resend.com) & Supabase Auth |
 | **Backend / API** | Vercel Serverless Functions (`/api`), Node.js, JWT, bcryptjs |
-| **Cloud Database** | [Neon Serverless Postgres](https://neon.tech) (`@neondatabase/serverless`) |
 | **Package Manager** | `pnpm` (v10+) |
 | **Deployment** | [Vercel](https://vercel.com) with automatic API routing |
 
@@ -82,11 +89,18 @@ Edit `.env` and add your keys:
 # Google Gemini API Key
 VITE_GEMINI_API_KEY=your_gemini_api_key_here
 
-# (Optional) Neon Postgres Connection for Cloud Auth & Sync
-DATABASE_URL=postgresql://neondb_owner:password@ep-xyz.us-east-2.aws.neon.tech/neondb?sslmode=require
+# Supabase Auth & Cloud Database
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key_here
+
+# (Optional) Neon Postgres Backup Database
+DATABASE_URL=postgresql://user:password@ep-xyz.us-east-2.aws.neon.tech/neondb?sslmode=require
 
 # JWT Secret for Session Authentication
 JWT_SECRET=your_jwt_secret_key_here
+
+# (Optional) Resend Transactional Email Key
+RESEND_API_KEY=re_your_resend_api_key_here
 ```
 
 ### 4. Run Development Server
@@ -98,42 +112,17 @@ Open **[http://localhost:5173](http://localhost:5173)** in your browser.
 
 ---
 
-## 🐘 Neon Serverless Postgres Setup
-
-1. Create a free account at **[neon.tech](https://neon.tech)** and create a new Postgres database project.
-2. In your Neon dashboard, copy the **Connection string** (choose `Node.js` or `Pooled connection`).
-3. Set the connection string in your `.env` or Vercel Environment Variables as `DATABASE_URL`:
-   ```env
-   DATABASE_URL=postgresql://user:password@ep-cool-fog-123456.us-east-2.aws.neon.tech/neondb?sslmode=require
-   ```
-4. Tables (`users`, `interview_sessions`) and indexes are **automatically created** on the first request via `api/db.js`. No manual migration scripts needed!
-
----
-
 ## 🚢 Deploy to Vercel
 
-### Option 1: Vercel CLI
 ```bash
-# Install Vercel CLI if needed
-pnpm add -g vercel
+# Push to GitHub
+git add .
+git commit -m "feat: complete multi-track interview prep ai"
+git push origin main
 
-# Deploy directly
-vercel
+# Deploy to Vercel Production
+npx vercel --prod
 ```
-
-### Option 2: Deploy from GitHub Dashboard
-1. Push this repository to your GitHub account:
-   ```bash
-   git add .
-   git commit -m "feat: complete interview prep ai studio with multi-track and neon auth"
-   git push origin main
-   ```
-2. Go to **[vercel.com/new](https://vercel.com/new)** and import your GitHub repository.
-3. In **Project Settings ➔ Environment Variables**, add:
-   - `VITE_GEMINI_API_KEY`: Your Google Gemini API Key.
-   - `DATABASE_URL`: Your Neon Postgres connection URL.
-   - `JWT_SECRET`: Any random 32+ character string for token signing.
-4. Click **Deploy**. Vercel will build with `pnpm` and host both the Vite SPA and `/api` serverless functions.
 
 ---
 
@@ -141,33 +130,8 @@ vercel
 
 - **Zero Hardcoded Secrets**: All API keys and connection strings are strictly managed through environment variables and local browser storage.
 - **Git Ignore**: `.env`, `.env.local`, and build artifacts are strictly excluded by `.gitignore`.
-- **Password Security**: User passwords in Neon Postgres are hashed using `bcryptjs` with salt rounds.
+- **Password Security**: Passwords are encrypted using `bcryptjs` with salt rounds.
 - **Client Direct Mode**: Users can also input their own Gemini API keys directly in the UI, stored safely in client `localStorage`.
-
----
-
-## 📚 Supported Frameworks Cheatsheet
-
-### 🚀 Product Management
-- **CIRCLES Method**: Comprehend, Identify, Report, Cut, List, Evaluate, Summarize.
-- **STAR Method**: Situation, Task, Action, Result.
-- **Root Cause Diagnostic**: External macro, Internal deployments, Cohort segmentation, Triage.
-- **Top-Down & Bottom-Up Sizing**: Addressable market and unit economic arithmetic.
-- **RICE Prioritization**: Reach, Impact, Confidence, Effort.
-
-### 💻 Software Engineering
-- **System Design 5-Step Architecture**: Requirements, Capacity estimations, High-level architecture, Data model & API, Resiliency & CAP trade-offs.
-- **Algorithm & DS Optimization**: Constraints, Brute force baseline, Optimal data structures, Implementation outline, Complexity verification.
-- **Production Debugging & Refactoring**: Triage, Hypotheses formulation, Observability flamegraphs, Root cause fix, Long-term hardening.
-- **REST / gRPC API & DB Design**: Resource modeling, Idempotency keys, Status contracts, Index strategies.
-- **STAR for Engineering Leadership**: Technical trade-offs, architecture RFC consensus, post-mortems.
-
-### 🏃 Scrum Master & Agile
-- **5-Stage Retrospective Framework** (Derby & Larsen): Set stage, Gather data, Generate insights, Decide action items, Close.
-- **5 Whys Impediment Removal**: Peeling symptom layers to institutional root cause and Definition of Ready (DoR).
-- **Flow Metrics & Continuous Delivery**: Cycle time, Lead time, CFD analysis, WIP limits.
-- **GROW Coaching Model**: Goal, Reality, Options, Will/Way forward.
-- **STAR for Servant Leaders**: Psychological safety, team predictability, cross-team dependency unblocking.
 
 ---
 
